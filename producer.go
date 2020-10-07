@@ -31,7 +31,7 @@ func main() {
 					)
 				} else {
 					fmt.Printf(
-						"Delivery failed %s \n ",
+						"Delivery failed Topic: %s \n ",
 						e.TopicPartition,
 					)
 				}
