@@ -18,7 +18,9 @@ func main() {
 		panic(err)
 	}
 
-	consumer.SubscribeTopics([]string{"myTopic"}, nil)
+	topic := "quickstart-events"
+
+	consumer.SubscribeTopics([]string{topic}, nil)
 
 	for {
 		message, err := consumer.ReadMessage(-1)

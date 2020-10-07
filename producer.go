@@ -33,7 +33,7 @@ func main() {
 	}()
 
 	// Produce messages to topic (asynchronously)
-	topic := "TopicName"
+	topic := "quickstart-events"
 
 	for _, message := range []string{"message1", "message2", "message3"} {
 		producer.Produce(&kafka.Message{
