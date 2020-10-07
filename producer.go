@@ -30,7 +30,10 @@ func main() {
 						e.Value,
 					)
 				} else {
-					fmt.Println("Delivery failed \n ", e.TopicPartition)
+					fmt.Printf(
+						"Delivery failed %s \n ",
+						e.TopicPartition,
+					)
 				}
 			}
 		}
