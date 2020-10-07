@@ -10,7 +10,6 @@ import (
 func main() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": "localhost",
-		"group.id":          "myGroup",
 		"auto.offset.reset": "earliest",
 	})
 
@@ -26,14 +25,14 @@ func main() {
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
 			fmt.Printf(
-				"Consumer error Topic: %s \n",
-				message.TopicPartition,
-			)
-		} else {
-			fmt.Printf(
 				"Received message Topic: %s Message: %s \n",
 				message.TopicPartition,
 				string(message.Value),
+			)
+		} else {
+			fmt.Printf(
+				"Consumer error Topic: %s \n",
+				message.TopicPartition,
 			)
 		}
 	}
