@@ -24,7 +24,11 @@ func main() {
 			switch e := event.(type) {
 			case *kafka.Message:
 				if e.TopicPartition.Error == nil {
-					fmt.Println("Delivery success \n ", e.TopicPartition)
+					fmt.Printf(
+						"Delivery success Topic: %s Message: %s \n",
+						e.TopicPartition,
+						e.Value,
+					)
 				} else {
 					fmt.Println("Delivery failed \n ", e.TopicPartition)
 				}
