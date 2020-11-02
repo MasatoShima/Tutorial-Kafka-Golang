@@ -3,7 +3,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+)
+
+import (
+	"github.com/linkedin/goavro"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
@@ -12,6 +18,13 @@ const (
 	port  = "9092"
 	topic = "SKDB.public.sdcocdmst"
 )
+
+type Schema struct {
+	Subject string `json:"subject"`
+	Version int    `json:"version"`
+	Id      int    `json:"id"`
+	Schema  string `json:"schema"`
+}
 
 func main() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
@@ -31,6 +44,12 @@ func main() {
 		panic(err)
 	}
 
+	schemaFile := readSchemaFile()
+
+	schema := fetchSchemaInfo(schemaFile)
+
+	codec := parseSchemaInfo(schema)
+
 	for {
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
@@ -39,6 +58,8 @@ func main() {
 				message.TopicPartition,
 				string(message.Value),
 			)
+
+			convertNativeFromBinary(codec, message.Value)
 		} else {
 			fmt.Printf(
 				"Consumer error Topic: %s \n",
@@ -46,6 +67,54 @@ func main() {
 			)
 		}
 	}
+}
+
+func readSchemaFile() []byte {
+	// Read schema file
+	file, err := ioutil.ReadFile("avro/schema/schema-SKDB.public.sdcocdmst.json")
+
+	if err != nil {
+		panic(err)
+	}
+
+	return file
+}
+
+func fetchSchemaInfo(file []byte) string {
+	// Fetch schema info
+	var jsonData Schema
+
+	err := json.Unmarshal(file, &jsonData)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return jsonData.Schema
+}
+
+func parseSchemaInfo(schemaInfo string) *goavro.Codec {
+	// Parse avro schema
+	codec, err := goavro.NewCodec(schemaInfo)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return codec
+}
+
+func convertNativeFromBinary(codec *goavro.Codec, avro []byte) {
+	// Convert binary data (avro format) to Golang form data
+	native, _, err := codec.NativeFromBinary(avro)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(native)
+
+	return
 }
 
 // End
