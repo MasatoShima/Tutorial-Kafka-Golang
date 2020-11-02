@@ -8,23 +8,26 @@ import (
 )
 
 const (
-	HOST  = "10.2.152.95"
-	TOPIC = "SKDB.public.sdcocdmst"
+	host         = "10.2.152.95"
+	portBrokers  = "9092"
+	portRegistry = "8081"
+	topic        = "SKDB.public.sdcocdmst"
 )
 
 func main() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers":  HOST,
-		"group.id":           "TEST",
-		"enable.auto.commit": false,
-		"auto.offset.reset":  "earliest",
+		"bootstrap.servers":   fmt.Sprintf("%s:%s", host, portBrokers),
+		"group.id":            "TEST",
+		"enable.auto.commit":  false,
+		"auto.offset.reset":   "earliest",
+		"schema.registry.url": fmt.Sprintf("http://%s:%s", host, portRegistry),
 	})
 
 	if err != nil {
 		panic(err)
 	}
 
-	err = consumer.SubscribeTopics([]string{TOPIC}, nil)
+	err = consumer.SubscribeTopics([]string{topic}, nil)
 
 	if err != nil {
 		panic(err)
