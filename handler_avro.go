@@ -5,35 +5,76 @@ Created on: 2020/10/13
 Description:
 Apache avro sample
 */
+
 package main
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	//"github.com/linkedin/goavro"
 )
 
+import (
+	"github.com/linkedin/goavro"
+)
+
+type Schema struct {
+	Subject string `json:"subject"`
+	Version int    `json:"version"`
+	Id      int    `json:"id"`
+	Schema  string `json:"schema"`
+}
+
 func main() {
-	// Read json file
-	file, errReadFile := ioutil.ReadFile("data/sample_1.json")
+	// Read schema file
+	file := readSchemaFile()
 
-	if errReadFile != nil {
-		panic(errReadFile)
+	// Fetch schema info
+	schema := fetchSchemaInfo(file)
+
+	// Parse avro schema
+	parseSchemaInfo(schema)
+}
+
+func readSchemaFile() []byte {
+	// Read schema file
+	file, err := ioutil.ReadFile("avro/schema/schema-SKDB.public.sdcocdmst.json")
+
+	if err != nil {
+		panic(err)
 	}
 
-	fmt.Printf("%s", file)
+	fmt.Printf("%s\n", file)
 
-	// Encode json file
-	var jsonData interface{}
+	return file
+}
 
-	errJsonUnmarshal := json.Unmarshal(file, &jsonData)
+func fetchSchemaInfo(file []byte) string {
+	// Fetch schema info
+	var jsonData Schema
 
-	if errJsonUnmarshal != nil {
-		panic(errJsonUnmarshal)
+	err := json.Unmarshal(file, &jsonData)
+
+	if err != nil {
+		panic(err)
 	}
 
-	fmt.Printf("%s", jsonData)
+	fmt.Printf("%s\n", jsonData.Schema)
+
+	return jsonData.Schema
+}
+
+func parseSchemaInfo(schemaInfo string) *goavro.Codec {
+	// Parse avro schema
+	codec, err := goavro.NewCodec(schemaInfo)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(codec)
+
+	return codec
 }
 
 // End
