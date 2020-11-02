@@ -7,20 +7,28 @@ import (
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
+const (
+	HOST  = "10.2.152.95"
+	TOPIC = "SKDB.public.sdcocdmst"
+)
+
 func main() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost",
-		"group.id":          "myGroup",
-		"auto.offset.reset": "earliest",
+		"bootstrap.servers":  HOST,
+		"group.id":           "TEST",
+		"enable.auto.commit": false,
+		"auto.offset.reset":  "earliest",
 	})
 
 	if err != nil {
 		panic(err)
 	}
 
-	topic := "quickstart-events"
+	err = consumer.SubscribeTopics([]string{TOPIC}, nil)
 
-	consumer.SubscribeTopics([]string{topic}, nil)
+	if err != nil {
+		panic(err)
+	}
 
 	for {
 		message, err := consumer.ReadMessage(-1)
