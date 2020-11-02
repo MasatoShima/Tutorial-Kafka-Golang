@@ -8,3 +8,5 @@ require (
 	github.com/linkedin/goavro v2.1.0+incompatible // indirect
 	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.4.2
 )
+
+// End
