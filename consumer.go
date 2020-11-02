@@ -60,11 +60,16 @@ func main() {
 			)
 
 			convertNativeFromBinary(codec, message.Value)
+
+		} else if message == nil {
+			continue
+
 		} else {
 			fmt.Printf(
 				"Consumer error Topic: %s \n",
 				message.TopicPartition,
 			)
+
 		}
 	}
 }
