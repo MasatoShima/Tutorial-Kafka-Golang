@@ -62,7 +62,8 @@ func main() {
 
 func convertNativeFromBinary(messageValue []byte) {
 	// Convert binary data (avro format) to Golang form data
-	ocf, err := goavro.NewOCFReader(bytes.NewReader(messageValue))
+	message := bytes.NewReader(messageValue)
+	ocf, err := goavro.NewOCFReader(message)
 
 	if err != nil {
 		panic(err)
