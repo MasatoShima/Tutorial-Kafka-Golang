@@ -45,7 +45,7 @@ func main() {
 				string(message.Value),
 			)
 
-			convertNativeFromBinary(message.Value)
+			convertNativeFromBinary(message)
 
 		} else if message == nil {
 			continue
@@ -60,11 +60,9 @@ func main() {
 	}
 }
 
-func convertNativeFromBinary(messageValue []byte) {
+func convertNativeFromBinary(messageValue *kafka.Message) {
 	// Convert binary data (avro format) to Golang form data
-	fmt.Println(messageValue)
-	fmt.Printf("%s", messageValue)
-	message := bytes.NewBuffer(messageValue)
+	message := bytes.NewReader(messageValue.Value)
 	ocf, err := goavro.NewOCFReader(message)
 
 	if err != nil {
