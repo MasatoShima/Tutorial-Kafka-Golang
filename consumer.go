@@ -3,9 +3,8 @@
 package main
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
-	"io/ioutil"
 )
 
 import (
@@ -44,12 +43,6 @@ func main() {
 		panic(err)
 	}
 
-	schemaFile := readSchemaFile()
-
-	schema := fetchSchemaInfo(schemaFile)
-
-	codec := parseSchemaInfo(schema)
-
 	for {
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
@@ -59,7 +52,7 @@ func main() {
 				string(message.Value),
 			)
 
-			convertNativeFromBinary(codec, message.Value)
+			convertNativeFromBinary(message.Value)
 
 		} else if message == nil {
 			continue
@@ -74,52 +67,28 @@ func main() {
 	}
 }
 
-func readSchemaFile() []byte {
-	// Read schema file
-	file, err := ioutil.ReadFile("avro/schema/schema-SKDB.public.sdcocdmst.json")
-
-	if err != nil {
-		panic(err)
-	}
-
-	return file
-}
-
-func fetchSchemaInfo(file []byte) string {
-	// Fetch schema info
-	var jsonData Schema
-
-	err := json.Unmarshal(file, &jsonData)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return jsonData.Schema
-}
-
-func parseSchemaInfo(schemaInfo string) *goavro.Codec {
-	// Parse avro schema
-	codec, err := goavro.NewCodec(schemaInfo)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return codec
-}
-
-func convertNativeFromBinary(codec *goavro.Codec, avro []byte) {
+func convertNativeFromBinary(messageValue []byte) {
 	// Convert binary data (avro format) to Golang form data
-	native, _, err := codec.NativeFromBinary(avro)
+	ocf, err := goavro.NewOCFReader(bytes.NewReader(messageValue))
 
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(native)
+	if ocf == nil {
+		fmt.Println("Skip processing, because empty data...")
+		return
+	}
 
-	return
+	for ocf.Scan() {
+		datum, err := ocf.Read()
+
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(datum)
+	}
 }
 
 // End
