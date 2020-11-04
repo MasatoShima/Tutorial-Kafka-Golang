@@ -50,6 +50,7 @@ func main() {
 		case *kafka.Message:
 			fmt.Println("This is message")
 			fmt.Println(m.Value)
+			convertNativeFromBinary(m)
 		case *kafka.Error:
 			fmt.Println("Error...")
 			fmt.Println(m.Code())
