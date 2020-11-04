@@ -15,7 +15,7 @@ import (
 )
 
 import (
-	"github.com/linkedin/goavro"
+	"github.com/linkedin/goavro/v2"
 )
 
 type Schema struct {
@@ -50,8 +50,6 @@ func readSchemaFile() []byte {
 		panic(err)
 	}
 
-	// fmt.Printf("%s\n", file)
-
 	return file
 }
 
@@ -65,7 +63,7 @@ func fetchSchemaInfo(file []byte) string {
 		panic(err)
 	}
 
-	// fmt.Printf("%s\n", jsonData.Schema)
+	fmt.Printf("%s\n", jsonData.Schema)
 
 	return jsonData.Schema
 }
@@ -77,8 +75,6 @@ func parseSchemaInfo(schemaInfo string) *goavro.Codec {
 	if err != nil {
 		panic(err)
 	}
-
-	// fmt.Println(codec)
 
 	return codec
 }

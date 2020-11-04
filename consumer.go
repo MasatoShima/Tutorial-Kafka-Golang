@@ -9,7 +9,7 @@ import (
 )
 
 import (
-	"github.com/linkedin/goavro"
+	"github.com/linkedin/goavro/v2"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
