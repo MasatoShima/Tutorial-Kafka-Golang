@@ -37,25 +37,14 @@ func main() {
 	}
 
 	for {
-		message, err := consumer.ReadMessage(-1)
-		if err == nil {
-			fmt.Printf(
-				"Received message Topic: %s Message: %s \n",
-				message.TopicPartition,
-				string(message.Value),
-			)
+		message := consumer.Poll(-1)
 
-			convertNativeFromBinary(message)
-
-		} else if message == nil {
-			continue
-
+		if message != nil {
+			fmt.Println("Received message")
+			fmt.Println(message)
 		} else {
-			fmt.Printf(
-				"Consumer error Topic: %s \n",
-				message.TopicPartition,
-			)
-
+			fmt.Println("Not received message")
+			continue
 		}
 	}
 }
