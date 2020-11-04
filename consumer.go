@@ -41,10 +41,20 @@ func main() {
 
 		if message != nil {
 			fmt.Println("Received message")
-			fmt.Println(message)
 		} else {
 			fmt.Println("Not received message")
 			continue
+		}
+
+		switch m := message.(type) {
+		case *kafka.Message:
+			fmt.Println("This is message")
+			fmt.Println(m.Value)
+		case *kafka.Error:
+			fmt.Println("Error...")
+			fmt.Println(m.Code())
+		default:
+			fmt.Println("Skip!")
 		}
 	}
 }
