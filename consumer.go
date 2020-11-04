@@ -18,13 +18,6 @@ const (
 	topic = "SKDB.public.sdcocdmst"
 )
 
-type Schema struct {
-	Subject string `json:"subject"`
-	Version int    `json:"version"`
-	Id      int    `json:"id"`
-	Schema  string `json:"schema"`
-}
-
 func main() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers":  fmt.Sprintf("%s:%s", host, port),
