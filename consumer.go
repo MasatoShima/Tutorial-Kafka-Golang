@@ -79,7 +79,7 @@ func main() {
 
 func readSchemaFile() []byte {
 	// Read schema file
-	file, err := ioutil.ReadFile("schema/schema-SKDB.public.sdcocdmst.json")
+	file, err := ioutil.ReadFile("avro/schema/schema-SKDB.public.sdcocdmst.json")
 
 	if err != nil {
 		panic(err)
