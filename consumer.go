@@ -3,8 +3,9 @@
 package main
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 )
 
 import (
@@ -17,6 +18,13 @@ const (
 	port  = "9092"
 	topic = "SKDB.public.sdcocdmst"
 )
+
+type Schema struct {
+	Subject string `json:"subject"`
+	Version int    `json:"version"`
+	Id      int    `json:"id"`
+	Schema  string `json:"schema"`
+}
 
 func main() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
@@ -36,53 +44,85 @@ func main() {
 		panic(err)
 	}
 
+	// Read schema file
+	file := readSchemaFile()
+
+	// Fetch schema info
+	schema := fetchSchemaInfo(file)
+
+	// Parse avro schema
+	codec := parseSchemaInfo(schema)
+
 	for {
-		message := consumer.Poll(-1)
+		message, err := consumer.ReadMessage(-1)
+		if err == nil {
+			fmt.Printf(
+				"Received message Topic: %s Message: %s \n",
+				message.TopicPartition,
+				string(message.Value),
+			)
 
-		if message != nil {
-			fmt.Println("Received message")
-		} else {
-			fmt.Println("Not received message")
+			convertNativeFromBinary(codec, message)
+
+		} else if message == nil {
 			continue
-		}
 
-		switch m := message.(type) {
-		case *kafka.Message:
-			fmt.Println("This is message")
-			fmt.Println(m.Value)
-			convertNativeFromBinary(m)
-		case *kafka.Error:
-			fmt.Println("Error...")
-			fmt.Println(m.Code())
-		default:
-			fmt.Println("Skip!")
+		} else {
+			fmt.Printf(
+				"Consumer error Topic: %s \n",
+				message.TopicPartition,
+			)
+
 		}
 	}
 }
 
-func convertNativeFromBinary(message *kafka.Message) {
-	// Convert binary data (avro format) to Golang form data
-	messageValue := bytes.NewBuffer(message.Value[8:])
-	ocf, err := goavro.NewOCFReader(messageValue)
+func readSchemaFile() []byte {
+	// Read schema file
+	file, err := ioutil.ReadFile("schema/schema-SKDB.public.sdcocdmst.json")
 
 	if err != nil {
 		panic(err)
 	}
 
-	if ocf == nil {
-		fmt.Println("Skip processing, because empty data...")
-		return
+	return file
+}
+
+func fetchSchemaInfo(file []byte) string {
+	// Fetch schema info
+	var jsonData Schema
+
+	err := json.Unmarshal(file, &jsonData)
+
+	if err != nil {
+		panic(err)
 	}
 
-	for ocf.Scan() {
-		datum, err := ocf.Read()
+	fmt.Printf("%s\n", jsonData.Schema)
 
-		if err != nil {
-			panic(err)
-		}
+	return jsonData.Schema
+}
 
-		fmt.Println(datum)
+func parseSchemaInfo(schemaInfo string) *goavro.Codec {
+	// Parse avro schema
+	codec, err := goavro.NewCodec(schemaInfo)
+
+	if err != nil {
+		panic(err)
 	}
+
+	return codec
+}
+
+func convertNativeFromBinary(codec *goavro.Codec, message *kafka.Message) {
+	// Convert binary data (avro format) to Golang form data
+	native, _, err := codec.NativeFromBinary(message.Value[5:])
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(native)
 }
 
 // End
