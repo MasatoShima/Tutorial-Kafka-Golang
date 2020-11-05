@@ -57,14 +57,14 @@ func main() {
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
 			fmt.Printf(
-				"Received message Topic: %s",
+				"Received message Topic: %s \n",
 				message.TopicPartition,
 			)
 
 			convertNativeFromBinary(codec, message)
 		} else if message == nil {
 			fmt.Printf(
-				"No received message Topic: %s",
+				"No received message Topic: %s \n",
 				message.TopicPartition,
 			)
 
