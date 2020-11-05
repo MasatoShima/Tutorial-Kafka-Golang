@@ -57,9 +57,8 @@ func main() {
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
 			fmt.Printf(
-				"Received message Topic: %s Message: %s \n",
+				"Received message Topic: %s",
 				message.TopicPartition,
-				string(message.Value),
 			)
 
 			convertNativeFromBinary(codec, message)
@@ -98,7 +97,7 @@ func fetchSchemaInfo(file []byte) string {
 		panic(err)
 	}
 
-	fmt.Printf("%s\n", jsonData.Schema)
+	// fmt.Printf("%s\n", jsonData.Schema)
 
 	return jsonData.Schema
 }
