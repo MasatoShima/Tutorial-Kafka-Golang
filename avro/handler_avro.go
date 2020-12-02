@@ -10,12 +10,18 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 )
 
 import (
 	"github.com/linkedin/goavro/v2"
+)
+
+const (
+	topic = "SKDB.public.sdcocdmst"
 )
 
 func main() {
@@ -43,13 +49,56 @@ func convertNativeFromBinary() {
 	}
 
 	for ocf.Scan() {
+		// Convert to map
 		datum, err := ocf.Read()
 
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Println(datum)
+		// fmt.Println(datum)
+
+		// Resolve nest data
+		keysList := [][]string{
+			{
+				"after",
+				fmt.Sprintf("%s.Value", topic),
+			},
+			{
+				"before",
+				fmt.Sprintf("%s.Value", topic),
+			},
+		}
+
+		child := datum
+
+		for _, keys := range keysList {
+			for _, key := range keys {
+				if child != nil {
+					child, _ = child.(map[string]interface{})[key]
+				}
+			}
+
+			if child != nil {
+				for key, value := range child.(map[string]interface{}) {
+					switch value.(type) {
+					case map[string]interface{}:
+						for _, v := range value.(map[string]interface{}) {
+							child.(map[string]interface{})[key] = v
+						}
+					}
+				}
+			}
+		}
+
+		// Convert to string
+		data, err := json.Marshal(datum)
+		if err != nil {
+			err = errors.New("failed converting map to string")
+			return
+		}
+
+		fmt.Println(fmt.Sprintf("%s", data))
 	}
 
 	return
