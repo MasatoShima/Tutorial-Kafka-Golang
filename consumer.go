@@ -80,7 +80,9 @@ func main() {
 
 func readSchemaFile() []byte {
 	// Read schema file
-	file, err := ioutil.ReadFile("avro/schema/schema-SKDB.public.sdcocdmst.json")
+	file, err := ioutil.ReadFile(
+		fmt.Sprintf("avro/schema/schema-%s.json", topic),
+	)
 
 	if err != nil {
 		panic(err)
