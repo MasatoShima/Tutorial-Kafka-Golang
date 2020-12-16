@@ -43,10 +43,14 @@ func main() {
 	topic := "quickstart-events"
 
 	for _, message := range []string{"message1", "message2", "message3"} {
-		producer.Produce(&kafka.Message{
+		err := producer.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 			Value:          []byte(message),
 		}, nil)
+
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	producer.Flush(15 * 1000)

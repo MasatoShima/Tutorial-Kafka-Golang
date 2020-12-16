@@ -6,17 +6,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-)
 
-import (
 	"github.com/linkedin/goavro/v2"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
 const (
-	host  = "10.2.152.95"
+	host  = "10.2.152.196"
 	port  = "9092"
-	topic = "SKDB.public.sdcocdmst"
+	topic = "SKDB.public.sdmstmkt"
 )
 
 type Schema struct {
@@ -61,11 +59,12 @@ func main() {
 				message.TopicPartition,
 			)
 
+			writeMessageValue(message)
 			convertNativeFromBinary(codec, message)
 		} else if message == nil {
 			fmt.Printf(
 				"No received message Topic: %s \n",
-				message.TopicPartition,
+				topic,
 			)
 
 			continue
@@ -75,6 +74,7 @@ func main() {
 				message.TopicPartition,
 			)
 		}
+		break
 	}
 }
 
@@ -113,6 +113,18 @@ func parseSchemaInfo(schemaInfo string) *goavro.Codec {
 	}
 
 	return codec
+}
+
+func writeMessageValue(message *kafka.Message) {
+	err := ioutil.WriteFile(
+		fmt.Sprintf("avro/avro-%s.json", topic),
+		message.Value,
+		777,
+	)
+
+	if err != nil {
+		panic(err)
+	}
 }
 
 func convertNativeFromBinary(codec *goavro.Codec, message *kafka.Message) {
