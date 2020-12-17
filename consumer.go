@@ -57,13 +57,21 @@ func main() {
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
 			fmt.Printf(
-				"Received message Topic: %s \n",
-				message.TopicPartition,
+				"Received message Topic: %v \n",
+				message.TopicPartition.Topic,
 			)
 
-			writeMessageValue(message)
+			err = writeMessageValue(message)
 
-			convertNativeFromBinary(codec, message)
+			if err != nil {
+				panic(err)
+			}
+
+			err = convertNativeFromBinary(codec, message)
+
+			if err != nil {
+				panic(err)
+			}
 
 		} else if message == nil {
 			fmt.Printf(
@@ -121,7 +129,7 @@ func parseSchemaInfo(schemaInfo string) *goavro.Codec {
 
 func writeMessageValue(message *kafka.Message) error {
 	err := ioutil.WriteFile(
-		fmt.Sprintf("avro/avro-%s.json", topic),
+		fmt.Sprintf("avro/avro-%s.avro", topic),
 		message.Value,
 		777,
 	)
