@@ -53,7 +53,7 @@ func main() {
 
 	fmt.Println("Start subscribe topic")
 
-	for i := 0; i >= 10; i++ {
+	for i := 0; i >= 50; i++ {
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
 			fmt.Printf(
@@ -61,7 +61,7 @@ func main() {
 				message.TopicPartition.Topic,
 			)
 
-			err = writeMessageValue(message)
+			err = writeMessageValue(message, i)
 
 			if err != nil {
 				panic(err)
@@ -126,9 +126,9 @@ func parseSchemaInfo(schemaInfo string) *goavro.Codec {
 	return codec
 }
 
-func writeMessageValue(message *kafka.Message) error {
+func writeMessageValue(message *kafka.Message, suffixNum int) error {
 	err := ioutil.WriteFile(
-		fmt.Sprintf("avro/avro-%s.avro", topic),
+		fmt.Sprintf("avro/avro-%s-%v.avro", topic, suffixNum),
 		message.Value,
 		777,
 	)
