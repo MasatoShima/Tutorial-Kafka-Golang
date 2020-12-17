@@ -9,97 +9,91 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"os"
-)
+	"io/ioutil"
 
-import (
 	"github.com/linkedin/goavro/v2"
 )
 
 const (
-	topic = "SKDB.public.sdcocdmst"
+	topic = "SKDB.public.sdmstmkt"
 )
 
-func main() {
-	// Convert binary data (avro format) to Golang form data
-	convertNativeFromBinary()
+type Schema struct {
+	Subject string `json:"subject"`
+	Version int    `json:"version"`
+	Id      int    `json:"id"`
+	Schema  string `json:"schema"`
 }
 
-func convertNativeFromBinary() {
+func main() {
+	// Read schema file
+	file := readSchemaFile()
+
+	// Fetch schema info
+	schema := fetchSchemaInfo(file)
+
+	// Parse avro schema
+	codec := parseSchemaInfo(schema)
+
 	// Convert binary data (avro format) to Golang form data
-	file, err := os.Open("avro-SKDB.public.sdcocdmst.avro")
+	convertNativeFromBinary(codec)
+}
+
+func readSchemaFile() []byte {
+	// Read schema file
+	file, err := ioutil.ReadFile(
+		fmt.Sprintf("schema/schema-%s.json", topic),
+	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	ocf, err := goavro.NewOCFReader(bufio.NewReader(file))
+	return file
+}
+
+func parseSchemaInfo(schemaInfo string) *goavro.Codec {
+	// Parse avro schema
+	codec, err := goavro.NewCodec(schemaInfo)
 
 	if err != nil {
 		panic(err)
 	}
 
-	if ocf == nil {
-		fmt.Println("Skip processing, because empty data...")
-		return
+	return codec
+}
+
+func fetchSchemaInfo(file []byte) string {
+	// Fetch schema info
+	var jsonData Schema
+
+	err := json.Unmarshal(file, &jsonData)
+
+	if err != nil {
+		panic(err)
 	}
 
-	for ocf.Scan() {
-		// Convert to map
-		datum, err := ocf.Read()
+	return jsonData.Schema
+}
 
-		if err != nil {
-			panic(err)
-		}
+func convertNativeFromBinary(codec *goavro.Codec) {
+	// Convert binary data (avro format) to Golang form data
+	file, err := ioutil.ReadFile(fmt.Sprintf("data/avro-%s.avro", topic))
 
-		// fmt.Println(datum)
-
-		// Resolve nest data
-		keysList := [][]string{
-			{
-				"after",
-				fmt.Sprintf("%s.Value", topic),
-			},
-			{
-				"before",
-				fmt.Sprintf("%s.Value", topic),
-			},
-		}
-
-		child := datum
-
-		for _, keys := range keysList {
-			for _, key := range keys {
-				if child != nil {
-					child, _ = child.(map[string]interface{})[key]
-				}
-			}
-
-			if child != nil {
-				for key, value := range child.(map[string]interface{}) {
-					switch value.(type) {
-					case map[string]interface{}:
-						for _, v := range value.(map[string]interface{}) {
-							child.(map[string]interface{})[key] = v
-						}
-					}
-				}
-			}
-		}
-
-		// Convert to string
-		data, err := json.Marshal(datum)
-		if err != nil {
-			err = errors.New("failed converting map to string")
-			return
-		}
-
-		fmt.Println(fmt.Sprintf("%s", data))
+	if err != nil {
+		panic(err)
 	}
+
+	// Convert binary data (avro format) to Golang form data
+	native, _, err := codec.NativeFromBinary(file[5:])
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(native)
 
 	return
 }
