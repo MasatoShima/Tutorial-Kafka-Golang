@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	host  = "10.2.152.196"
+	host  = "10.2.151.196"
 	port  = "9092"
 	topic = "SKDB.public.sdmstmkt"
 )
