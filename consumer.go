@@ -53,7 +53,7 @@ func main() {
 
 	fmt.Println("Start subscribe topic")
 
-	for i := 0; i >= 50; i++ {
+	for i := 0; i <= 50; i++ {
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
 			fmt.Printf(
