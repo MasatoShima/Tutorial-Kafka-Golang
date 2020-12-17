@@ -51,9 +51,9 @@ func main() {
 	// Parse avro schema
 	codec := parseSchemaInfo(schema)
 
-	for {
-		fmt.Println("Start subscribe topic")
+	fmt.Println("Start subscribe topic")
 
+	for i := 0; i >= 10; i++ {
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
 			fmt.Printf(
@@ -86,7 +86,6 @@ func main() {
 				message.TopicPartition,
 			)
 		}
-		break
 	}
 }
 
