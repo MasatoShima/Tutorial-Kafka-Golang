@@ -52,6 +52,8 @@ func main() {
 	codec := parseSchemaInfo(schema)
 
 	for {
+		fmt.Println("Start subscribe topic")
+
 		message, err := consumer.ReadMessage(-1)
 		if err == nil {
 			fmt.Printf(
@@ -60,7 +62,9 @@ func main() {
 			)
 
 			writeMessageValue(message)
+
 			convertNativeFromBinary(codec, message)
+
 		} else if message == nil {
 			fmt.Printf(
 				"No received message Topic: %s \n",
@@ -115,7 +119,7 @@ func parseSchemaInfo(schemaInfo string) *goavro.Codec {
 	return codec
 }
 
-func writeMessageValue(message *kafka.Message) {
+func writeMessageValue(message *kafka.Message) error {
 	err := ioutil.WriteFile(
 		fmt.Sprintf("avro/avro-%s.json", topic),
 		message.Value,
@@ -123,19 +127,23 @@ func writeMessageValue(message *kafka.Message) {
 	)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
-func convertNativeFromBinary(codec *goavro.Codec, message *kafka.Message) {
+func convertNativeFromBinary(codec *goavro.Codec, message *kafka.Message) error {
 	// Convert binary data (avro format) to Golang form data
 	native, _, err := codec.NativeFromBinary(message.Value[5:])
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	fmt.Println(native)
+
+	return nil
 }
 
 // End
