@@ -14,7 +14,7 @@ import (
 const (
 	host  = "10.2.151.196"
 	port  = "9092"
-	topic = "SKDB.public.sdmstbas"
+	topic = "SKDB.public.sdmstmkt"
 )
 
 type Schema struct {
